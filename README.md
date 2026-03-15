@@ -125,4 +125,5 @@ Generated at runtime (not committed):
 
 ## License
 
-Use and modify as you like. No formal license file in this repo.
+MIT
+Use and modify as you like.
