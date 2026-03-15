@@ -86,7 +86,9 @@ HeartopiaPainter/
 │   ├── __main__.py              # Entry point for: python -m heartopia_painter
 │   └── gloutuny_painter.py      # Full app: GUI, paint engine, calibration, overlays
 ├── heartopia_canvas_detect.py   # Standalone canvas detection utilities (optional)
-├── painter_v2.py                # Older painter version (optional)
+├── heartopia_v2/                # Older painter version (optional)
+│   ├── heartopia_canvas_detect.py
+│   ├── painter_v2.py
 ├── color.svg
 ├── color_loader.js
 └── index_ref.html
@@ -105,7 +107,7 @@ Generated at runtime (not committed):
 | `heartopia_painter/` | Main package. Run with `python -m heartopia_painter`. |
 | `heartopia_painter/gloutuny_painter.py` | Single-file app: constants, palette, calibration types, paint engine, GUI, capture overlay. |
 | `heartopia_canvas_detect.py` | Standalone canvas detection (optional). |
-| `painter_v2.py` | Older painter version (optional). |
+| `heartopia_v2/painter_v2.py` | Older painter version (optional). |
 | `requirements.txt` | Python dependencies. |
 | `heartopia_calibration.json` | Created after calibration; stored in project root (gitignored). |
 
