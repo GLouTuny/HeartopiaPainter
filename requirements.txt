@@ -1,5 +1,5 @@
 # Heartopia Painter — install with: pip install -r requirements.txt
-pyautogui>=1.0.0
+pyautogui>=pyautogui>=0.9.54
 Pillow>=9.0.0
 numpy>=1.24.0
 keyboard>=0.13.0
