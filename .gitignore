@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# User-specific / generated (do not commit)
+heartopia_calibration.json
+heartopia_painted.json
+config.json
+*.log
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Optional large local assets (uncomment if you don't want them in git)
+# *.png
+# *.jpg
+# *.jpeg

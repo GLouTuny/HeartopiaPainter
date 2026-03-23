@@ -1216,9 +1216,11 @@ def paint_by_color(
             if (not opts.verify_streaming) and not (
                 stop_painting or (should_stop and should_stop())
             ):
-                def _verify_progress(px, py, _done=done, _total=total):
+                def _verify_progress(px, py):
+                    # Read done/total from enclosing scope each call — never use default-arg
+                    # capture here; defaults are evaluated once at def time and go stale.
                     if progress_cb:
-                        progress_cb(px, py, _done, _total)
+                        progress_cb(px, py, done, total)
                 _verify_and_repair_color_group(
                     remaining,
                     canvas_rect,

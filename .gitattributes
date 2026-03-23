@@ -1,0 +1,14 @@
+# Normalize line endings; cross-platform friendly defaults
+* text=auto
+
+# Python: consistent LF everywhere
+*.py text eol=lf
+
+# Binary assets — avoid merge/diff corruption
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pyc binary
