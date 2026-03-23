@@ -62,12 +62,16 @@ If you change resolution, fullscreen, or scaling, **re-detect the canvas** and *
 
 ## First-time workflow (quick)
 
-1. **Paint** tab → **Browse Image** → choose your reference image.  
-2. Set **Ratio** and **Detail** (grid size). If you change the grid after detecting the canvas, click **Start Painting** again (the app rebuilds cell positions).  
-3. **Canvas** → **Auto Detect** (striped unpainted canvas) or **Manual Drag** around the grid.  
-4. **Calibration** tab → follow steps (back button, per-group colors, paint + bucket tools). Data auto-saves to `heartopia_calibration.json`.  
-5. **Paint** tab → **Start Painting** → switch to the game during the countdown.  
-6. **F10** pause/resume · **F12** stop (if `keyboard` is installed).
+1. **Paint** tab → **Browse Image** → choose your reference image.
+2. Set **Ratio** and **Detail** (grid size). If you change the grid after detecting the canvas, click **Start Painting** again (the app rebuilds cell positions).
+3. **Canvas** → **Auto Detect** (striped unpainted canvas) or **Manual Drag** around the grid.
+4. **Calibration** tab → follow the steps (back button, per-group colors, paint + bucket tools). Data auto-saves to `heartopia_calibration.json`.
+5. On **Calibration**, skip the **three crossed-out (×) colors** (do not calibrate those):
+
+   <img width="163" height="135" alt="Three crossed-out colors to skip in calibration" src="https://github.com/user-attachments/assets/3d54fc7e-56c1-403f-be64-7f5c7e507396" />
+
+6. **Paint** tab → **Start Painting** → switch to the game during the countdown.
+7. **F10** pause/resume · **F12** stop (if `keyboard` is installed).
 
 ---
 
