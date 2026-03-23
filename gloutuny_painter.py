@@ -1,5 +1,5 @@
 """
-GLouTuny Painter  v4.1  — Professional Edition
+GLouTuny Painter  v4.2  — 100% Accuracy + Professional UI
 ════════════════════════════════════════════════════════════════════════════════
 Heartopia Auto Painter — full GUI, in-app calibration wizard, bucket-fill engine.
 
@@ -32,9 +32,7 @@ KEY IMPROVEMENTS OVER v3.1
 
 REQUIREMENTS
 ────────────
-  pip install -r requirements.txt   # or: pyautogui pillow numpy keyboard pynput mss
-  Run from repo root:  python -m heartopia_painter
-  See README.md for full install and run instructions.
+  pip install pyautogui pillow numpy keyboard pynput mss
 """
 
 from __future__ import annotations
@@ -306,13 +304,15 @@ def detect_canvas_auto(gw, gh):
     return None
 
 def build_cell_to_screen(canvas, gw, gh):
-    bx,by=canvas["snip_x"],canvas["snip_y"]
-    rw,rh=canvas["snip_w"],canvas["snip_h"]
-    cw,ch=rw/gw,rh/gh
-    xs=[round(bx+x*cw+cw/2) for x in range(gw)]
-    ys=[round(by+y*ch+ch/2) for y in range(gh)]
-    def c2s(x,y): return xs[x],ys[y]
-    canvas["cell_to_screen"]=c2s; return c2s
+    """Map grid cell (x,y) to screen pixel — matches Heartopia-Image-Painter _cell_center."""
+    bx, by = canvas["snip_x"], canvas["snip_y"]
+    rw, rh = canvas["snip_w"], canvas["snip_h"]
+    cw, ch = rw / gw, rh / gh
+    xs = [int(bx + (x + 0.5) * cw) for x in range(gw)]
+    ys = [int(by + (y + 0.5) * ch) for y in range(gh)]
+    def c2s(x, y): return xs[x], ys[y]
+    canvas["cell_to_screen"] = c2s
+    return c2s
 
 def show_canvas_overlay(canvas, gw, gh, duration=4.0, main_root=None):
     try:
@@ -1050,7 +1050,11 @@ def paint_by_color(
                 if not interior_comps: continue
 
                 if bp: _tap(*bp, opts)
-                filled_cells = set(map(tuple, bnd))
+                # Only mark *interior* cells as bucket-done here. Do NOT pre-seed with the
+                # outline: if any outline pixel failed to register but an interior bucket
+                # succeeded, old logic put all bnd in bucketed and skipped them in the
+                # normal pass — one missed outline cell stayed wrong forever (see ref paint).
+                interior_bucketed: set = set()
                 spill_detected = False
                 filled_any = False
 
@@ -1065,10 +1069,16 @@ def paint_by_color(
                     if base_rgb is not None:
                         cx, cy = c2s(fx, fy)
                         actual = _get_pixel_fast(cx, cy)
-                        if _d2(actual, base_rgb) <= base_tol2: continue  # fill didn't take
+                        if _d2(actual, base_rgb) <= base_tol2:
+                            # Retry once — same idea as double-tap repair in ref streaming verify
+                            _tap(*c2s(fx, fy), opts)
+                            if settle > 0: time.sleep(settle)
+                            actual = _get_pixel_fast(cx, cy)
+                            if _d2(actual, base_rgb) <= base_tol2:
+                                continue  # fill still didn't take; normal pass will get sub
 
                     filled_any = True
-                    filled_cells |= set(map(tuple, sub))
+                    interior_bucketed |= set(map(tuple, sub))
 
                     # Spill check: sample outside the component boundary
                     if allow_cautious or True:  # always check
@@ -1093,8 +1103,10 @@ def paint_by_color(
                 if pp: _tap(*pp, opts)
 
                 if filled_any:
-                    bucketed |= filled_cells
-                    _done(list(filled_cells))
+                    # Interior is done by bucket; outline always eligible for normal pass
+                    # so any missed outline pixel is repainted (not left out of remaining).
+                    bucketed |= interior_bucketed
+                    _done(list(interior_bucketed))
 
                 if spill_detected:
                     disable_region_fill = True; break
@@ -1117,6 +1129,7 @@ def paint_by_color(
             _stream_shade_ready = [True]  # mutable flag — False after back-button
 
             def flush_verify(force=False, max_steps=1):
+                nonlocal done
                 # Collect a batch to sample together (faster than one-by-one)
                 steps = 0
                 batch = []
@@ -1170,11 +1183,15 @@ def paint_by_color(
 
             if opts.verify_streaming: flush_verify(force=True)
 
-            # ── Per-color post-pass verify (zip-style) ──────────────────────────
-            if not (stop_painting or (should_stop and should_stop())):
+            # ── Per-color post-pass verify (reference: skip if streaming already verified)
+            if (not opts.verify_streaming
+                    and not (stop_painting or (should_stop and should_stop()))):
+                def _verify_progress(px, py):
+                    if progress_cb:
+                        progress_cb(px, py, done, total)
                 _verify_and_repair_color_group(
                     remaining, c2s, canvas_rect, shade_rgb, group, shade, pal, opts,
-                    should_stop=should_stop, status_cb=status_cb, progress_cb=progress_cb
+                    should_stop=should_stop, status_cb=status_cb, progress_cb=_verify_progress
                 )
 
     if status_cb: status_cb("✅  Painting complete!")
@@ -1332,7 +1349,7 @@ def launch_gui():
 
     # ── Root window ────────────────────────────────────────────────────────────
     root = tk.Tk()
-    root.title("Heartopia Painter  —  v4.1  ·  GLouTuny")
+    root.title("Heartopia Painter  —  v4.2  ·  GLouTuny")
     root.configure(bg=BG)
     root.geometry("1360x860")
     root.minsize(1100, 720)
@@ -1387,7 +1404,7 @@ def launch_gui():
     # Version badge top-right
     vf = tk.Frame(header, bg=CARD)
     vf.pack(side=tk.RIGHT, padx=16)
-    tk.Label(vf, text=" v4.1 ", bg=EDGE2, fg=DIM, font=FSB, padx=6, pady=3).pack()
+    tk.Label(vf, text=" v4.2 ", bg=EDGE2, fg=DIM, font=FSB, padx=6, pady=3).pack()
 
     div(root, c=EDGE).pack(fill=tk.X)
 
@@ -1506,10 +1523,10 @@ def launch_gui():
     ratio_cb.pack(side=tk.LEFT, padx=(0, 10))
     lbl(rg_row, "Detail", fg=DIM, font=FS, bg=CARD).pack(side=tk.LEFT, padx=(0, 6))
     detail_cb = ttk.Combobox(rg_row, textvariable=detail_var,
-                              values=DETAIL_NAMES, state="readonly", width=12)
+                              values=DETAIL_NAMES, state="readonly", width=10)
     detail_cb.pack(side=tk.LEFT)
 
-    gi_lbl = lbl(s2_body, "", fg=DIM, font=FM, wraplength=300)
+    gi_lbl = lbl(s2_body, "", fg=DIM, font=FM)
     gi_lbl.pack(anchor="w")
     gi_lbl.config(textvariable=grid_info_var)
 
@@ -1638,7 +1655,7 @@ def launch_gui():
     ready_bar.pack(fill=tk.X)
     ready_var = tk.StringVar(value="4 steps required before painting")
     ready_lbl = tk.Label(ready_bar, textvariable=ready_var, bg=CARD2, fg=DIM,
-                         font=FS, wraplength=310, justify=tk.LEFT)
+                         font=FS, wraplength=280, justify=tk.LEFT)
     ready_lbl.pack(anchor="w")
 
     # ── Right content: Preview + progress + controls ───────────────────────────
@@ -1817,6 +1834,7 @@ def launch_gui():
         )
         dm  = S["draw_map"]; cv  = S["canvas_det"]; cal = S["cal"]
         gw  = S["gw"];       gh  = S["gh"]
+        build_cell_to_screen(cv, gw, gh)
         c2s = cv["cell_to_screen"]
         prog_var.set(0)
         pal = PaletteCtrl(cal, opts)
@@ -2106,7 +2124,7 @@ def launch_gui():
         pg_listbox.see(g - 1)
         _refresh_pergroup_ui()
 
-    # Hidden listbox (drives selection state; grid buttons 1–13 are the visible UI)
+    # Hidden listbox (drives the logic, UI hidden behind group grid)
     pg_listbox = tk.Listbox(f_pg, height=1, width=1, bg=CARD, fg=TEXT,
                              selectbackground=BLUE, font=FN, highlightthickness=0)
     for g in range(1, 14):
