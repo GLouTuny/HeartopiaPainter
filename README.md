@@ -8,7 +8,7 @@ Automated canvas painter for **Heartopia** with a full GUI, in-app calibration, 
 
 ### 1. Python
 
-- **Python 3.10+** recommended (3.11 / 3.13 work on Windows).
+- **[Python 3.10+](https://www.python.org/downloads/)** recommended (3.11 / 3.13 work on Windows).
 - During install, enable **“Add Python to PATH”** (Windows).
 
 ### 2. Install dependencies
